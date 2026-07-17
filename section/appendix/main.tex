@@ -5,7 +5,7 @@
 
 \rev{\noindent\textbf{Modality-specific semantics.} Table~\ref{tab:modality} summarizes, for each modality, the constraint type, the edit representation $\Delta$, and where the constraint is enforced (referenced from Section~\ref{sec:instance}).}
 
-\begin{table}[t]
+\begin{table}[ht]
 \centering
 \small
 \caption{\rev{Modality-specific counterfactual semantics: constraint type, edit representation, and where each constraint is enforced.}}
@@ -26,9 +26,11 @@ Image    & scene/region semantics & localized edit & semantic validation \\
 \FloatBarrier
 
 
+\hw{\noindent Table~\ref{tab:modality} makes the instance-level semantics concrete for each modality. Each row names (i) the constraint type that defines admissibility, (ii) the form taken by the interpretable edit $\Delta$, and (iii) the stage at which the constraint is cheapest to enforce soundly. For tabular data, column rules and immutability are attribute-level and can be pushed into the index and candidate generation; for temporal data, dynamics and execution validity require checking a candidate sub-trajectory and are enforced during execution-level validation; graph constraints (connectivity, typing, capacity) require structural validation; and text/image admissibility (span rewrites, localized edits) requires semantic validation. The table thus shows feasibility shifting from cheap, index-time checks (tabular) to progressively more expensive validation (temporal, graph, semantic)---precisely the gradient that the coarse-to-fine pipeline of Section~\ref{sec:query-answering} is designed to exploit, applying costly checks only to the small candidate pool.}
+
 \rev{\noindent\textbf{Collective validity (Table~\ref{tab:quality}).} We evaluate the set objectives of Section~\ref{sec:set}---diversity $\Omega_{\text{div}}$, robustness $\Omega_{\text{rob}}$, and fairness $\Omega_{\text{fair}}$---for top-$k$ lowest-cost selection and for objective-specific Set-step selectors ($k{=}5$, pool $m{=}100$, $200$ queries). Top-$k$ is optimal for \emph{none} of the objectives; each objective is best served by its own selector, and diversity and robustness trade off. The pattern holds across text, image, and graph.}
 
-\begin{table}[t]
+\begin{table}[ht]
 \centering\small
 \caption{\rev{Collective-validity objectives (Section~\ref{sec:set}) for top-$k$ vs.\ objective-specific Set-step selection; higher $\Omega$ is better, lower Cost is better. Best per column in \textbf{bold}.}}
 \label{tab:quality}
@@ -52,9 +54,11 @@ Setting & Selector & $\Omega_{\text{div}}\!\uparrow$ & $\Omega_{\text{rob}}\!\up
 \end{table}
 \FloatBarrier
 
+\hw{\noindent Reading Table~\ref{tab:quality} column by column confirms that no single selector dominates. On tabular data, the diversity selector raises $\Omega_{\text{div}}$ from $97.12$ (top-$k$) to $117.60$, the robustness selector improves $\Omega_{\text{rob}}$ from $-14.16$ to $-14.09$, and the fairness selector improves $\Omega_{\text{fair}}$ from $-0.179$ to $-0.100$; in every case top-$k$ is beaten in the targeted objective. The effect is far larger on temporal data, where diversity optimization increases $\Omega_{\text{div}}$ more than six-fold ($151.52\!\to\!957.31$). These gains are not free: the same diversity selector raises the mean cost from $14.86$ to $77.09$, and the diversity- and robustness-optimal sets differ, so the objectives genuinely trade off against one another and against cost. Top-$k$ wins only the Cost column. This is direct evidence that collective validity (P4) cannot be reduced to lowest-cost top-$k$ retrieval and requires a first-class, user-specified $\Omega$.}
+
 \rev{\noindent\textbf{Counterfactual capability (Table~\ref{tab:baselines}).} We compare DcCA against reference reimplementations of representative counterfactual generators on validity, feasibility (immutability), in-distribution rate, set diversity, and cost. Data-grounded methods (DcCA, FACE) are in-distribution by construction, but only DcCA also respects immutability (via immutability-matched retrieval); model-centric generators achieve low nominal cost yet are infeasible and off-manifold. DcCA also yields the most diverse valid set. This is a complementary trade-off: model-centric methods minimize nominal cost, while DcCA emphasizes feasibility, realism, and verifiability.}
 
-\begin{table}[t]
+\begin{table}[ht]
 \centering\small
 \caption{\rev{Counterfactual capability: DcCA vs.\ model-centric generators. Controlled simulation on synthetic tabular data ($N{=}6000$, $3$ categorical immutable attributes, $k{=}5$, $150$ queries) with reference reimplementations of each method's core mechanism---not the released libraries and not UCI data. Higher is better except Cost.}}
 \label{tab:baselines}
@@ -73,9 +77,11 @@ GeCo (genetic)~\cite{schleich2021geco}        & 80.8  & 0.0  & 0.7   & 20.24 & 1
 \end{table}
 \FloatBarrier
 
+\hw{\noindent Table~\ref{tab:baselines} separates \emph{validity} (does the outcome flip?) from \emph{feasibility} (does the edit respect immutable attributes?) and the \emph{in-distribution} rate (does the result lie on the data manifold?). Almost every method flips the label (validity $\approx100\%$; only GeCo drops to $80.8\%$), so validity alone is uninformative. The decisive columns are feasibility and in-distribution rate: the model-centric generators (DiCE, Wachter, GeCo) are $0\%$ feasible and essentially $0\%$ in-distribution because they freely edit immutable attributes and leave the manifold, while FACE, though $100\%$ in-distribution by construction, respects immutability only $1.9\%$ of the time. DcCA is the only method that is simultaneously $100\%$ in-distribution and substantially feasible ($64.7\%$), and it returns the most diverse valid set ($\Omega_{\text{div}}{=}27.08$). The generators' seemingly lower nominal cost ($1.73$--$1.89$ vs.\ $4.09$) is therefore misleading---it is obtained precisely by making infeasible, off-manifold edits. This is the complementary trade-off: model-centric methods minimize nominal distance, whereas DcCA guarantees feasibility, realism, and verifiability.}
+
 \rev{\noindent\textbf{Approximation and scale (Tables~\ref{tab:ann}--\ref{tab:scale}).} Approximate (IVF-style coarse-quantized) retrieval preserves recall at substantial speedup over exact search, confirming that approximate nearest-neighbor techniques apply to counterfactual retrieval over embeddings. End-to-end latency up to $N{=}5\times10^{5}$ shows set selection is near-constant while retrieval dominates scaling, motivating the constraint-aware index of Section~\ref{sec:query-answering}.}
 
-\begin{table}[t]
+\begin{table}[ht]
 \centering\small
 \caption{\rev{Exact vs.\ approximate (IVF-style) retrieval; $N{=}10000$, $d{=}64$, $k{=}100$. Exact search: $1.65$\,ms/query.}}
 \label{tab:ann}
@@ -92,7 +98,7 @@ nprobe & Recall@100 & Speedup vs.\ exact \\
 \end{table}
 \FloatBarrier
 
-\begin{table}[t]
+\begin{table}[ht]
 \centering\small
 \caption{\rev{Scalability of online query answering (search + set selection), $d{=}64$. Set selection is near-constant; retrieval dominates scaling.}}
 \label{tab:scale}
@@ -108,3 +114,5 @@ $N$ & Search (ms) & Set-step (ms) & Total (ms) \\
 \end{tabular}
 \end{table}
 \FloatBarrier
+
+\hw{\noindent Together, Tables~\ref{tab:ann} and~\ref{tab:scale} characterize the efficiency dimension. In Table~\ref{tab:ann}, raising the IVF probe count trades speed for recall: a single probe is $22.7\times$ faster than exact search but recovers only $42.5\%$ of the true neighbors, whereas $\text{nprobe}{=}8$ already attains \emph{perfect} recall@$100$ at a $5.6\times$ speedup, confirming that standard approximate-nearest-neighbor techniques transfer to counterfactual retrieval over embeddings with no measurable quality loss. Table~\ref{tab:scale} then isolates where time goes as the corpus grows to $N{=}5\times10^{5}$: the set-selection step stays essentially constant ($\approx1.5$\,ms) because it operates only on the small candidate pool, while brute-force search grows roughly linearly ($0.10\!\to\!129.09$\,ms) and dominates end-to-end latency at scale. This is exactly the cost that a constraint-aware index (Section~\ref{sec:query-answering}) is designed to remove, and it identifies retrieval---not set optimization---as the scaling bottleneck.}
