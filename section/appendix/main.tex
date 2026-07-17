@@ -23,7 +23,6 @@ Image    & scene/region semantics & localized edit & semantic validation \\
 \bottomrule
 \end{tabular}}
 \end{table}
-\FloatBarrier
 
 
 \hw{Table~\ref{tab:modality} makes the instance-level semantics concrete for each modality. Each row names (i) the constraint type that defines admissibility, (ii) the form taken by the interpretable edit $\Delta$, and (iii) the stage at which the constraint is cheapest to enforce soundly. For tabular data, column rules and immutability are attribute-level and can be pushed into the index and candidate generation; for temporal data, dynamics and execution validity require checking a candidate sub-trajectory and are enforced during execution-level validation; graph constraints (connectivity, typing, capacity) require structural validation; and text/image admissibility (span rewrites, localized edits) requires semantic validation. The table thus shows feasibility shifting from cheap, index-time checks (tabular) to progressively more expensive validation (temporal, graph, semantic)---precisely the gradient that the coarse-to-fine pipeline of Section~\ref{sec:query-answering} is designed to exploit, applying costly checks only to the small candidate pool.}
@@ -52,7 +51,6 @@ Setting & Selector & $\Omega_{\text{div}}\!\uparrow$ & $\Omega_{\text{rob}}\!\up
 \bottomrule
 \end{tabular}
 \end{table}
-\FloatBarrier
 
 \hw{Reading Table~\ref{tab:quality} column by column confirms that no single selector dominates. On tabular data, the diversity selector raises $\Omega_{\text{div}}$ from $97.12$ (top-$k$) to $117.60$, the robustness selector improves $\Omega_{\text{rob}}$ from $-14.16$ to $-14.09$, and the fairness selector improves $\Omega_{\text{fair}}$ from $-0.179$ to $-0.100$; in every case top-$k$ is beaten in the targeted objective. The effect is far larger on temporal data, where diversity optimization increases $\Omega_{\text{div}}$ more than six-fold ($151.52\!\to\!957.31$). These gains are not free: the same diversity selector raises the mean cost from $14.86$ to $77.09$, and the diversity- and robustness-optimal sets differ, so the objectives genuinely trade off against one another and against cost. Top-$k$ wins only the Cost column. This is direct evidence that collective validity (P4) cannot be reduced to lowest-cost top-$k$ retrieval and requires a first-class, user-specified $\Omega$.}
 
@@ -75,7 +73,6 @@ GeCo (genetic)~\cite{schleich2021geco}        & 80.8  & 0.0  & 0.7   & 20.24 & 1
 \bottomrule
 \end{tabular}}
 \end{table}
-\FloatBarrier
 
 \hw{Table~\ref{tab:baselines} separates \emph{validity} (does the outcome flip?) from \emph{feasibility} (does the edit respect immutable attributes?) and the \emph{in-distribution} rate (does the result lie on the data manifold?). Almost every method flips the label (validity $\approx100\%$; only GeCo drops to $80.8\%$), so validity alone is uninformative. The decisive columns are feasibility and in-distribution rate: the model-centric generators (DiCE, Wachter, GeCo) are $0\%$ feasible and essentially $0\%$ in-distribution because they freely edit immutable attributes and leave the manifold, while FACE, though $100\%$ in-distribution by construction, respects immutability only $1.9\%$ of the time. DcCA is the only method that is simultaneously $100\%$ in-distribution and substantially feasible ($64.7\%$), and it returns the most diverse valid set ($\Omega_{\text{div}}{=}27.08$). The generators' seemingly lower nominal cost ($1.73$--$1.89$ vs.\ $4.09$) is therefore misleading---it is obtained precisely by making infeasible, off-manifold edits. This is the complementary trade-off: model-centric methods minimize nominal distance, whereas DcCA guarantees feasibility, realism, and verifiability.}
 
@@ -96,7 +93,6 @@ nprobe & Recall@100 & Speedup vs.\ exact \\
 \bottomrule
 \end{tabular}
 \end{table}
-\FloatBarrier
 
 \begin{table}[ht]
 \centering\small
@@ -113,6 +109,5 @@ $N$ & Search (ms) & Set-step (ms) & Total (ms) \\
 \bottomrule
 \end{tabular}
 \end{table}
-\FloatBarrier
 
 \hw{Together, Tables~\ref{tab:ann} and~\ref{tab:scale} characterize the efficiency dimension. In Table~\ref{tab:ann}, raising the IVF probe count trades speed for recall: a single probe is $22.7\times$ faster than exact search but recovers only $42.5\%$ of the true neighbors, whereas $\text{nprobe}{=}8$ already attains \emph{perfect} recall@$100$ at a $5.6\times$ speedup, confirming that standard approximate-nearest-neighbor techniques transfer to counterfactual retrieval over embeddings with no measurable quality loss. Table~\ref{tab:scale} then isolates where time goes as the corpus grows to $N{=}5\times10^{5}$: the set-selection step stays essentially constant ($\approx1.5$\,ms) because it operates only on the small candidate pool, while brute-force search grows roughly linearly ($0.10\!\to\!129.09$\,ms) and dominates end-to-end latency at scale. This is exactly the cost that a constraint-aware index (Section~\ref{sec:query-answering}) is designed to remove, and it identifies retrieval---not set optimization---as the scaling bottleneck.}
