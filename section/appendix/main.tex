@@ -1,11 +1,9 @@
-Section~ection{Additional Evaluation}
+\section{Additional Evaluation}
 \label{app:eval}
 
 \rev{This appendix reports the counterfactual-\emph{quality} studies that complement the runtime results of Table~\ref{tab:multimodal_comparison}. All studies are reproducible (fixed seeds) and, consistent with the prototype, use synthetic embeddings; the counterfactual-generator comparison uses our own reference reimplementations of each method's core mechanism (not the released libraries, and not UCI data). Extending to large real corpora and released libraries on standard benchmarks (Adult, German-Credit, HELOC) is ongoing.}
 
 \rev{\noindent\textbf{Modality-specific semantics.} Table~\ref{tab:modality} summarizes, for each modality, the constraint type, the edit representation $\Delta$, and where the constraint is enforced (referenced from Section~\ref{sec:instance}).}
-
-\jp{Check why Tables 3 and 4 come after Tables 6-7.}
 
 \begin{table}[t]
 \centering
@@ -25,6 +23,7 @@ Image    & scene/region semantics & localized edit & semantic validation \\
 \bottomrule
 \end{tabular}}
 \end{table}
+\FloatBarrier
 
 
 \rev{\noindent\textbf{Collective validity (Table~\ref{tab:quality}).} We evaluate the set objectives of Section~\ref{sec:set}---diversity $\Omega_{\text{div}}$, robustness $\Omega_{\text{rob}}$, and fairness $\Omega_{\text{fair}}$---for top-$k$ lowest-cost selection and for objective-specific Set-step selectors ($k{=}5$, pool $m{=}100$, $200$ queries). Top-$k$ is optimal for \emph{none} of the objectives; each objective is best served by its own selector, and diversity and robustness trade off. The pattern holds across text, image, and graph.}
@@ -51,6 +50,7 @@ Setting & Selector & $\Omega_{\text{div}}\!\uparrow$ & $\Omega_{\text{rob}}\!\up
 \bottomrule
 \end{tabular}
 \end{table}
+\FloatBarrier
 
 \rev{\noindent\textbf{Counterfactual capability (Table~\ref{tab:baselines}).} We compare DcCA against reference reimplementations of representative counterfactual generators on validity, feasibility (immutability), in-distribution rate, set diversity, and cost. Data-grounded methods (DcCA, FACE) are in-distribution by construction, but only DcCA also respects immutability (via immutability-matched retrieval); model-centric generators achieve low nominal cost yet are infeasible and off-manifold. DcCA also yields the most diverse valid set. This is a complementary trade-off: model-centric methods minimize nominal cost, while DcCA emphasizes feasibility, realism, and verifiability.}
 
@@ -71,6 +71,7 @@ GeCo (genetic)~\cite{schleich2021geco}        & 80.8  & 0.0  & 0.7   & 20.24 & 1
 \bottomrule
 \end{tabular}}
 \end{table}
+\FloatBarrier
 
 \rev{\noindent\textbf{Approximation and scale (Tables~\ref{tab:ann}--\ref{tab:scale}).} Approximate (IVF-style coarse-quantized) retrieval preserves recall at substantial speedup over exact search, confirming that approximate nearest-neighbor techniques apply to counterfactual retrieval over embeddings. End-to-end latency up to $N{=}5\times10^{5}$ shows set selection is near-constant while retrieval dominates scaling, motivating the constraint-aware index of Section~\ref{sec:query-answering}.}
 
@@ -89,6 +90,7 @@ nprobe & Recall@100 & Speedup vs.\ exact \\
 \bottomrule
 \end{tabular}
 \end{table}
+\FloatBarrier
 
 \begin{table}[t]
 \centering\small
@@ -105,3 +107,4 @@ $N$ & Search (ms) & Set-step (ms) & Total (ms) \\
 \bottomrule
 \end{tabular}
 \end{table}
+\FloatBarrier
