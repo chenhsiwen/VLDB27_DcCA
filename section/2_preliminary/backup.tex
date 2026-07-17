@@ -1,0 +1,36 @@
+\section{Counterfactual Queries}
+
+Let $\mathcal D=\{(x_i,y_i)\}_{i=1}^n$ be a labeled dataset, where each instance $x_i$ has an outcome $y_i$ drawn from a label space $\mathcal Y$. Given a query instance $q=(x_q,y_q)$, a \emph{counterfactual query} asks for a small set of grounded examples from $\mathcal D$ whose outcomes differ from $y_q$ and that can serve as realistic alternatives to $q$ under application-specific constraints on permissible changes. For example, in credit decisions income may be actionable while age is not; in temporal search, edits must still yield a valid timeline. Among admissible alternatives, the system prefers low-cost changes and may additionally trade off cost against set-level properties such as diversity.
+
+
+\paragraph{Problem statement.}
+Given $q$, we seek a size-$k$ set of dataset examples whose outcomes differ from $y_q$. The goal is to return feasible alternatives that score well under a set-level utility while keeping total transformation cost small. We parameterize a counterfactual query as $(q,\omega,\Omega,k)$, where $\omega$ defines instance-level semantics and $\Omega$ evaluates the selected set.
+
+\paragraph{Instance-level (feasibility and edit cost).}
+The specification $\omega$ encodes which transformations from $q$ to a candidate $x\in\mathcal D$ are admissible and how to measure the cost of that change. It induces an indicator  $f_\omega(x_q,x)\in\{0,1\}$ and a cost function
+$c_\omega(x_q,x)\in\mathbb R_{\ge0}\cup\{\infty\}$. Here $f_\omega(x_q,x)=1$ indicates that $x$ is admissible under $\omega$, while $c_\omega(x_q,x)$ quantifies the cost of adopting $x$ as an alternative to $q$. Then, the feasible target space is
+\begingroup\small
+\begin{equation}
+\mathcal F_\omega(q)
+=
+\{x_i\in\mathcal D : y_i\neq y_q,\; f_\omega(x_q,x_i)=1\}.
+\label{eq:feasible}
+\end{equation}
+\endgroup
+Since $\omega$ is typically determined by modality- or domain-level rules and remains stable across queries, the dataset $\mathcal D$ may be organized using modality-specific structure or constraint-induced partitions. This reflects that admissibility and per-instance cost are structural properties rather than query-contingent ones.
+
+\paragraph{Set-level (collective selection).}
+In contrast, the objective $\Omega$ evaluates the collective properties of a set $S\subseteq\mathcal F_\omega(q)$ and is often query-dependent. Preferences such as diversity or robustness arise at selection time. At the same time, selection should favor low-cost alternatives using the per-instance costs $c_\omega(\cdot,\cdot)$ defined by $\omega$. Retrieval therefore trades off (i) query-time set quality via $\Omega$ and (ii) total change cost across the selected set.
+
+\paragraph{Overall Objective.}
+By jointly considering instance-level admissibility and cost through $\omega$ together with set-level selection criteria $\Omega$, the counterfactual query problem is formulated as follows.
+\begingroup\small
+\begin{equation}
+S^\star \in 
+\arg\max_{S\subseteq \mathcal F_\omega(q),\, |S|=k}
+\left(\Omega(S;q) - \sum_{x\in S} c_\omega(x_q,x)\right).
+\label{eqn:objective}
+\end{equation}
+\endgroup
+In addition to returning the selected instances $S^\star$, actionable counterfactuals require, for each $x \in S^\star$, a \emph{domain-level edit description} $\Delta(x_q, x)$ that specifies how the query instance $x_q$ should be modified to obtain $x$ in the original domain. For tabular data, $\Delta(x_q, x)$ can be represented as the set of changed attributes with their before and after values. For structured modalities, it can be expressed as a sequence of valid edit operations, such as graph edit transformations~\cite{gao2010survey} in graph data or optimal transport alignments~\cite{charpentier2023optimal} in sequence data (detailed in Section~\ref{sec:instance}).\footnote{While $\Delta(x_q, x)$ models the actual modifications required to transform $x_q$ into $x$, the cost function $c_\omega(x_q, x)$ is typically specified by domain experts and quantifies the effort or burden associated with carrying out those changes.} 
+

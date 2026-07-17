@@ -1,0 +1,34 @@
+%\subsection{Two-Phase Execution System}
+
+To realize our vision in system design, we develop a two-phase framework for answering counterfactual queries. Unlike nearest-neighbor search, counterfactual querying must enforce instance-level semantics $\omega$ (feasibility and cost) and optimize a set-level objective $\Omega$. This requires tightly integrating constraint-aware retrieval with set-level optimization.
+
+The framework consists of an offline phase that prepares reusable structures over $\mathcal D$ and a specification space $\mathcal W$, and an online phase that answers queries $(q,\omega,\Omega,k)$ efficiently using these structures.
+
+\subsubsection{Offline (Preprocessing for $(\mathcal D,\mathcal W)$)}
+Given $\mathcal D$ and a family \jp{Why family? How do we define a family here?} of specifications $\omega \in \mathcal W$, the system builds reusable components to support efficient evaluation of feasibility and cost under different $\omega$. First (\textbf{Step 1.a}), it identifies structural primitives that define admissibility and transformation cost, such as immutable attributes, constraint types, and cost components. These primitives parameterize $\omega$ at query time. Second (\textbf{Step 1.b}), it constructs a constraint-aware index $\mathcal I$ over $\mathcal D$, organized according to the structure induced by $\mathcal W$, so that queries can be efficiently evaluated under different specifications.
+
+The design of $\mathcal I$ depends on the role of $\omega$. For example, when $\omega$ mainly reweights dimensions, metric-aware structures (e.g., weighted KD-trees~\cite{reif2022scalable}, ball trees~\cite{dolatshah2015ball}, cover trees~\cite{izbicki2015faster}) enable efficient pruning. When $\omega$ is dominated by discrete constraints, techniques such as partitioned indices~\cite{lee2019constraint}, bitmap filtering~\cite{chan1998bitmap}, or inverted indices~\cite{babenko2014inverted} can filter infeasible candidates before cost evaluation.
+
+\paragraph{Online (querying over $(q,\omega,\Omega,k)$).}
+Given a query $(q,\omega,\Omega,k)$, directly optimizing Eq.~\eqref{eqn:objective} is computationally expensive. We can therefore adopt a coarse-to-fine strategy that leverages $\mathcal I$.
+
+First (\textbf{Step 2.a}), it retrieves a candidate pool $\mathcal A_\omega(q)$ consisting of admissible instances $\mathbf{x}$ with low cost $\omega(\mathbf{x}_q,\mathbf{x})$, returned in nondecreasing cost order for early pruning. Note that, if $\omega \notin \mathcal W$, the system falls back to a linear scan over $\mathcal D$. Formally,
+\begingroup\small
+\begin{equation}
+\mathcal A_\omega(q) 
+\in 
+\arg\min_{\substack{\mathcal A_\omega \subseteq \mathcal \omega(q)\\ |\mathcal A_\omega|=m}}\left\{
+\sum_{\mathbf{x}\in \mathcal A_\omega} \omega(\mathbf{x}_q,\mathbf{x})\right\},
+\end{equation}
+\endgroup
+where $m \ge k$ controls the pool size.
+
+Second (\textbf{Step 2.b}), it selects the final set $S^\star \subseteq \mathcal A_\omega(q)$ by optimizing Eq.~\eqref{eqn:objective}, balancing transformation cost with the set-level objective $\Omega$ (e.g., diversity, robustness, fairness). Finally (\textbf{Step 2.c}), for each $\mathbf{x} \in S^\star$, the system produces an interpretable edit $\Delta(\mathbf{x}_q, \mathbf{x})$ that specifies how to transform $\mathbf{x}_q$ into $\mathbf{x}$, consistent with $\omega$.
+
+\rev{This coarse-to-fine design bounds the cost of enforcing constraints and validating feasibility. Cheap attribute- and metric-level checks are pushed into candidate generation (Step~2.a), so most of the infeasible instances are pruned before any costly check; expensive execution-level (temporal, graph) or semantic (text, image) validation is applied only to the small candidate pool $\mathcal A_\omega(q)$ of size $m\ge k$. Validation cost therefore scales with $|\mathcal A_\omega|$ rather than $|\mathcal D|$, and because candidates are returned in nondecreasing cost order, validation can terminate once $k$ admissible answers are confirmed; enlarging $m$ trades validation effort for a higher chance of filling the set, a controllable accuracy/latency knob (P3).} 
+
+\prev{This coarse-to-fine design bounds the cost of constraint enforcement and feasibility validation. Cheap attribute- and metric-level checks are performed during candidate generation (Step~2.a), pruning most infeasible instances before any expensive validation. Costly execution-level (temporal, graph) or semantic (text, image) validation is then applied only to the small candidate pool $\mathcal A_\omega(q)$, so validation cost scales with $|\mathcal A_\omega|$ rather than $|\mathcal D|$. Since candidates are returned in nondecreasing cost order, validation terminates once $k$ admissible answers are found. Increasing the pool size $m$ improves the likelihood of finding $k$ feasible counterfactuals at the expense of additional validation, providing a controllable accuracy--latency trade-off (Principle P3 in Section~\ref{sec:core_principles}).}
+
+%Figure~\ref{fig:cf_two_stage_pipeline} illustrates the overall framework for counterfactual queries. In the offline stage, the system first performs \emph{1.a) Admissibility and cost parameterization} by examining the parameter space and selecting a configuration $\omega \in \mathcal{W}$, which defines the admissibility rules and transformation cost, where infeasible changes are assigned infinite cost. It then performs \emph{1.b) Constraint-aware index construction}, building a reusable index $\mathcal{I}$ over $\mathcal{D}$ to support efficient retrieval under these instance-level semantics. The index design is determined by the geometry induced by $\omega$. When $\omega$ restricts changes to a small mutable subspace or emphasizes a limited number of weighted dimensions, tree-based indices are typically effective. When $\omega$ allows greater flexibility or operates over high-dimensional representations, graph-based approximate nearest neighbor indices are more suitable.
+
+%In the online stage, given the prebuilt index $\mathcal{I}$, the system proceeds in three steps. First, \emph{2.a) Cost-aware candidate generation} retrieves and ranks admissible instances under $\omega$, producing a candidate pool $\mathcal{A}_\omega(q)$ (green nodes) for query $q$ (orange node). Next, \emph{2.b) Set selection under $\Omega$} selects the final response set $S^\star \subseteq \mathcal{A}_\omega(q)$ (blue nodes) to optimize the specified set-level objective. Finally, \emph{2.c) Interpretable change selection} returns $S^\star$ together with domain-level edit descriptions $\Delta(q,x)$ for each selected instance $x \in S^\star$.

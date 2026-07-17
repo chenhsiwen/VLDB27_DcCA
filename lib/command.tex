@@ -1,0 +1,58 @@
+
+% ----------------------------
+% PVLDB-style metadata placeholders (optional but commonly used with acmart for VLDB/PVLDB)
+% ----------------------------
+\newcommand\vldbdoi{XX.XX/XXX.XX}
+\newcommand\vldbpages{XXX--XXX}
+\newcommand\vldbvolume{XX}
+\newcommand\vldbissue{X}
+\newcommand\vldbyear{20XX}
+\newcommand\vldbauthors{\authors}
+\newcommand\vldbtitle{\shorttitle}
+\newcommand\vldbavailabilityurl{https://anonymous.4open.science/r/DcCA-825B/}
+\newcommand\vldbpagestyle{plain}
+
+% ----------------------------
+% Notation and definitions
+% ----------------------------
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+\newcommand{\emb}{\phi}
+\newcommand{\dist}{d}
+\newcommand{\cf}{\mathsf{cf}}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+
+\newcommand{\hw}[1]{{\color{red} HW: #1}}
+
+\newcommand{\bb}[1]{{\color{blue} BB: #1}}
+
+% Revision highlighting for the VLDB'27 major-revision response (all changes in blue)
+\newcommand{\rev}[1]{{\color{blue}#1}}
+
+
+
+\titlespacing*{\paragraph}
+{0pt}{0.5em}{0.5em}
+
+\newtheoremstyle{compact}
+  {0.5em}   
+  {0.5em}  
+  {\itshape}
+  {}   
+  {\bfseries}
+  {.}   
+  {0.5em} 
+  {}   
+
+\theoremstyle{compact}
+
+\titleformat{\paragraph}[runin]
+{\normalfont\bfseries}
+{\theparagraph}{1em}{}
+
+\setlist[itemize]{leftmargin=16pt}
+\setlist[enumerate]{leftmargin=16pt}

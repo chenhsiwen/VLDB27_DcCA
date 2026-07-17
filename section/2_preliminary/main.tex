@@ -1,0 +1,43 @@
+\section{Answering Counterfactual Queries}
+\label{sec:query-answering}
+
+In this section, we formalize counterfactual querying and present a framework for answering such queries, providing a concrete foundation for realizing our vision in system design and implementation.
+
+\subsection{Counterfactual Queries}
+
+A central step in realizing our vision is to model counterfactual queries as a first-class data management abstraction. Let $\mathcal D=\{(\mathbf{x}_i,y_i)\}_{i=1}^n$ be a labeled dataset, where $\mathbf{x}_i \in \mathbb{R}^d$ denotes an instance with $d$ attributes and $y_i$ its outcome (or class label). Given a query $q=(\mathbf{x}_q,y_q)$, a \emph{counterfactual query} retrieves a small set of instances from $\mathcal D$ that (i) have outcomes different from $y_q$, (ii) are close to $\mathbf{x}_q$ under a suitable notion of change, and (iii) satisfy domain constraints, thus serving as realistic and feasible alternatives. For example, some attributes (e.g., income) may be changeable while others (e.g., age) are immutable, and edits must preserve validity. Among feasible candidates, we prefer those requiring minimal change and often favor sets that are diverse or informative. Formally, the goal is to select a size-$k$ set of alternatives, specified by $(q,\omega,\Omega,k)$, where $\omega$ defines instance-level feasibility and change cost, and $\Omega$ evaluates the quality of the selected set.
+
+The specification $\omega$ encodes both admissibility and the cost of transforming $\mathbf{x}_q$ into a candidate $\mathbf{x}\in\mathbb R^d$. It induces a cost $\omega(\mathbf{x}_q,\mathbf{x})\in\mathbb R_{\ge 0}\cup\{\infty\}$, where a transformation is admissible if and only if $\omega(\mathbf{x}_q,\mathbf{x})<\infty$. Accordingly, the feasible target space is
+\begingroup\small
+\begin{equation}
+\mathcal \omega(q)
+=
+\{\mathbf{x}_i : (\mathbf{x}_i,y_i)\in\mathcal D,\; y_i\neq y_q,\; \omega(\mathbf{x}_q,\mathbf{x}_i)<\infty\}.
+\label{eq:feasible}
+\end{equation}
+\endgroup
+Thus, $\omega$ defines admissibility and per-instance cost relative to $q$.
+
+\rev{In practice, $\omega$ is instantiated per modality and per deployment. For tabular data, $\omega$ is a weighted sum of per-column monotonic edit costs with $\infty$ for immutable attributes (e.g., age); for temporal data it combines an alignment cost with a dynamics-validity predicate; for text and image it uses a representation-space cost with a semantic-admissibility predicate (Section~\ref{sec:instance}). Operationally, $\omega$ is \emph{defined} from domain or policy rules, optionally \emph{learned} from logged interventions or expert preferences, and \emph{validated} against held-out feasible outcomes or expert audit. Composite constraints combine as a conjunction whose violation drives $\omega\!\to\!\infty$, so feasibility remains cleanly separated from effort even under multiple interacting rules.}
+
+In contrast, the objective $\Omega$ evaluates the collective quality of a candidate set $S \subseteq \mathcal \omega(q)$, capturing preferences such as diversity, fairness, and robustness. At the same time, selection should favor low-cost alternatives based on the per-instance cost $\omega(\cdot,\cdot)$. Thus, counterfactual retrieval balances (i) set-level quality under $\Omega$ and (ii) the total transformation cost of the selected set.
+
+By jointly considering instance-level admissibility and cost through $\omega$ and set-level selection criteria $\Omega$, the counterfactual query problem is formulated as
+\begingroup\small
+\begin{equation}
+S^\star \in 
+\arg\max_{S \subseteq \mathcal \omega(q),\, |S|=k}
+\left\{\Omega(S; q) - \sum_{\mathbf{x} \in S} \omega(\mathbf{x}_q, \mathbf{x})\right\}.
+\label{eqn:objective}
+\end{equation}
+\endgroup
+
+\jp{The following paragraph has two problems: (1) DcCA has not been introduced yet. This papragraph should be about data-centric counterfactual analysis in general instead of the proof of concept system DcCA. (2) Data-centric methods rely on model-centric methods as fallback and thus are handicapped.}
+
+\rev{\noindent\textbf{Evidence availability and failure behavior.}
+Because DcCA retrieves from observed data, its answer is bounded by the evidence in $\mathcal D$. When $\omega(q)=\emptyset$, no feasible, outcome-changing instance exists, and DcCA returns the empty set, which \emph{certifies} infeasibility under $\omega$---a verifiable statement that generative methods cannot make. When $0<|\omega(q)|<k$, DcCA returns a partial set with provenance. To improve coverage, DcCA supports a graded fallback: a constraint-relaxation ladder that reports the minimal relaxation restoring feasibility, and an explicitly flagged hand-off to a model-centric or generative method as an unverified fallback. The trade-off is explicit and complementary: data-centric retrieval guarantees realism, feasibility, and verifiability but is bounded by the coverage of $\mathcal D$, whereas generative methods always return an answer at the cost of feasibility and verifiability. Coverage is itself measurable and grows with $\mathcal D$.}
+
+\prev{\noindent\textbf{Evidence availability and query semantics.}
+Data-centric counterfactual querying is defined over observed data. Consequently, its answers are naturally bounded by the evidence available in $\mathcal D$. When $\omega(q)=\emptyset$, no feasible outcome-changing instance exists in the data under the specified constraints, and the correct query answer is the empty set. Rather than representing a failure, the empty set is itself informative: it certifies that no evidence-supported counterfactual exists under $\omega$. Likewise, when $0<|\omega(q)|<k$, the query returns all feasible counterfactuals together with their provenance. In both cases, the query faithfully reflects the available evidence in $\mathcal D$.
+
+This evidence-based semantics distinguishes data-centric counterfactual analysis from model-centric and generative approaches. Data-centric counterfactual querying asks \emph{``What feasible alternatives are supported by the observed data?''} and therefore emphasizes realism, feasibility, provenance, and verifiability. In contrast, model-centric approaches ask \emph{``What alternative would a predictive model produce?''} and can always synthesize a counterfactual, but without guaranteeing that it corresponds to an observed or feasible intervention. The two paradigms therefore answer different questions rather than serving as fallbacks for one another. As more data become available, the coverage of data-centric counterfactual querying naturally increases, while preserving its evidence-based semantics.}

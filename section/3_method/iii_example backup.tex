@@ -1,0 +1,43 @@
+\subsection{Illustrated Example on Tabular Data}
+We present an end-to-end counterfactual query on tabular loan data to illustrate the framework and principles.
+
+
+\begin{tcolorbox}[
+    colback=gray!10,
+    colframe=gray!60,
+    boxrule=0.5pt,
+    arc=3pt,
+    left=6pt,
+    right=6pt,
+    top=6pt,
+    bottom=6pt
+]
+Maya applies for a loan and is denied. She asks: 
+\begin{center}
+\emph{``What would I need to change to get approved?''}
+\end{center}
+Her denied record is
+\begingroup\small
+\begin{equation*}
+\texttt{(Income=\$58k, Util.=41\%, Delinq.=1, State=NC, Age=28)}.
+\end{equation*}
+\endgroup
+She seeks real approved applicants as grounded counterfactuals, and multiple distinct alternatives if more than one plausible path exists.
+\end{tcolorbox}
+
+Her request instantiates a counterfactual query with four high-level requirements: (i) each returned option should be an actual approved applicant and come with a clear, human-readable summary of how it differs from her profile, (ii) the options should respect the application’s rules for what can and cannot be changed, and the notion of ``effort'' should match what changes are realistically harder versus easier,
+(iii) results should come back quickly enough to be usable as an interactive tool, and (iv) the set should contain multiple meaningfully different paths to approval rather than minor variations of the same suggestion. The system addresses these requirements via the two-phase framework.
+
+Offline, the system prepares the historical dataset $\mathcal D$ together with the admissible specification family $\omega \in \mathcal W$. In this tabular setting, the system works directly in feature space: after normalization and encoding, every returned answer corresponds to a real record, and the system can report feature-level differences $\Delta(x_q,x)$ (P1).
+
+The offline stage supports evaluation of instance-level admissibility and transformation cost under $\omega$. Admissibility is determined implicitly by $\omega$ (P2): infeasible transformations are assigned infinite cost. For Maya, any approved record with $\text{Age} \neq 28$ yields $\omega(x_q,x)=\infty$ and is therefore excluded. Transformation effort is also encoded by $\omega(x_q,x)$, which distinguishes permissible edits: under this specification, a moderate income increase is treated differently from changing state, so low-cost candidates concentrate on plausible edits near $x_q$.
+
+
+To support efficient retrieval, the system builds a label-aware index $\mathcal{I}$ over $\mathcal{D}$ (P3). $\mathcal{I}$ is used to search within the approved portion of $\mathcal{D}$, so a denied query retrieves candidates directly from the approved subset. In tabular settings, the index $\mathcal{I}$ can be implemented using spatial or nearest-neighbor structures, optionally combined with constraint-aware filtering, ensuring that candidate generation remains efficient while respecting $\omega$.
+
+
+Online, when Maya submits $x_q$, the system uses $\mathcal I$ to retrieve a candidate pool $\mathcal A(q)$ of feasible approved alternatives, biased toward small $\omega(x_q,x)$. From this pool, it produces the final size-$k$ response set by optimizing the set-level objective and total transformation cost in Eq.~\eqref{eqn:objective}. In this example, $\Omega$ rewards distinct recourse directions, so the system prefers returning one option driven primarily by increased income, one by reduced utilization, and one by reduced delinquencies, rather than multiple near-duplicates reflecting the same type of change (P4).
+
+\input{section/3_method/table/output}
+
+The output of Maya's query is shown in Table~\ref{tab:Example1Table}. The returned options are grounded in real approved applicants (P1), feasible under $\omega$ (P2), efficiently retrieved using label-aware structure (P3), and selected to balance set utility and total transformation cost under $\omega$ (P4).

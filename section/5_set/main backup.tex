@@ -1,0 +1,47 @@
+\section{Set-Level Optimization for Collective Counterfactual Analysis}
+
+\label{sec:set}
+
+Section~\ref{sec:instance} characterizes instance-level quality through feasibility and transformation cost, both induced by $\omega$, which filters infeasible candidates and ranks admissible ones according to $\omega(x_q,x)$. However, actionable recourse rarely reduces to selecting the top-$k$ nearest feasible instances. Such a strategy ignores interactions among alternatives and often yields trivial or redundant variations along a single modification axis. Counterfactual querying is therefore inherently set-valued: the response must be evaluated collectively through a set-level objective $\Omega$. This elevates the task from filtering and ranking to a structured subset selection problem, where quality emerges from the joint composition of candidates rather than their individual scores.
+
+\paragraph{Robustness.}
+Counterfactual identity can be unstable under small perturbations of the query~\cite{guyomard2023generating}. Let $\mathcal N(q)$ denote a neighborhood of queries. A robustness objective can be formulated as follows,
+\begingroup\small
+\begin{equation}
+\Omega_{\text{rob}}(S) = -\mathbb E_{x_q'\sim\mathcal N(x_q)} \left[ \min_{x\in S} d(x_q',x) \right].
+\end{equation}
+\endgroup
+For each perturbed query $x_q'$ for $\mathcal N(x_q)$, the inner $\min_{x \in S}$ selects the closest instance in $S$, and the expectation aggregates this minimal distance over perturbations. Maximizing $\Omega_{\text{rob}}(S)$ is therefore equivalent to minimizing the expected nearest-neighbor distance between perturbed queries and the set $S$, promoting local stability of the counterfactual set.
+
+\paragraph{Diversity.}
+Selecting the nearest feasible candidates directly often produces multiple variants that differ only along a single modification axis. To promote structurally distinct alternatives, diversity~\cite{laugel2023achieving} is formulated at the set level as an aggregate measure of pairwise dispersion:
+\begingroup\small
+\begin{equation}
+    \Omega_{\text{div}}(S) 
+    = \sum_{x_i, x_j \in S,\, i<j} \omega(x_i, x_j).
+\end{equation}
+\endgroup
+Incorporating diversity requires balancing proximity and dispersion to obtain structurally distinct and actionable alternatives. The objective $\Omega_{\text{div}}(S)$ corresponds to the classical max-sum diversification problem~\cite{borodin2017max}, which is NP-hard. Nevertheless, constant-factor approximation algorithms based on greedy or local-search strategies provide guarantees under cardinality or matroid constraints.
+
+\paragraph{Fairness.}
+When counterfactual sets are used for auditing or explanation, their composition becomes critical~\cite{kusner2017counterfactual}. Let $g(x)$ denote a protected attribute such as gender or ethnicity, and let $\pi_a$ denote a desired target proportion for group $a$. A fairness constraint can be expressed as follows.
+\begingroup\small
+\begin{equation}
+\Omega_{\text{fair}}=\frac{1}{|S|}\sum_{x\in S}\mathbf{1}[g(x)=a] \approx \pi_a .
+\end{equation}
+\endgroup
+For example, in hiring or loan recourse systems, the returned explanation set may be required to satisfy prescribed proportions across demographic groups to avoid systematically privileging a subgroup. Unlike instance-level feasibility, which is evaluated independently for each candidate, fairness is inherently a global property that couples decisions across $S$, thereby increasing the combinatorial complexity of selection.
+
+\paragraph{Coverage.}
+When counterfactual sets are used to provide actionable guidance, the range of interventions they represent becomes critical~\cite{wen2025enhancing}. A coverage objective can be expressed as follows.
+\begingroup\small
+\begin{equation}
+\Omega_{\text{cov}}(S)
+=
+\left|
+\bigcup_{x\in S}\Delta(x_q,x)
+\right|,
+\end{equation}
+\endgroup
+which rewards sets that span distinct intervention dimensions rather than concentrating on a narrow subset of changes. In clinical decision support, for example, counterfactuals that vary treatment type, dosage, and timing provide richer insight than repeated small adjustments to a single parameter. Unlike diversity, which measures pairwise dissimilarity among candidates, coverage evaluates how broadly the set explores the space of possible modifications. Optimizing coverage may therefore conflict with strict proximity minimization and requires explicit trade-off management.
+

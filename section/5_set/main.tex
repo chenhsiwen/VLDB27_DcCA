@@ -1,0 +1,39 @@
+\section{Collective Validity in Counterfactual Queries}
+\label{sec:set}
+
+While instance-level semantics define feasibility and transformation cost via $\omega$, counterfactual querying is inherently set-valued: users seek a small set of alternatives that reveal complementary actionable paths. This section introduces set-level optimization to construct informative answers, extending retrieval to structured subset selection and enabling reasoning about diversity, robustness, and fairness. It complements the challenges in Section~\ref{sec:intro} by extending efficient retrieval to set selection and enabling principled reasoning across candidates.
+
+This requirement is captured by the principle of collective validity (P4), where answer quality depends not only on individual feasibility and cost, but also on how answers interact as a set. Simply returning the top-$k$ lowest-cost instances often yields redundant options. Instead, we define a set-level objective $\Omega$ to evaluate candidate sets, balancing cost with collective utility.
+
+\paragraph{Robustness.}
+Robust counterfactuals should remain stable under small perturbations of the query~\cite{guyomard2023generating}, ensuring that suggested actions are not overly sensitive to minor variations. Let $\mathcal N(\mathbf{x}_q)$ denote a neighborhood of the query instance. A robustness objective is,
+\begingroup\small
+\begin{equation}
+\Omega_{\text{rob}}(S) = -\mathbb E_{\mathbf{x}_q'\sim\mathcal N(\mathbf{x}_q)} \left[ \min_{\mathbf{x}\in S} \{d(\mathbf{x}_q',\mathbf{x})\} \right].
+\end{equation}
+\endgroup
+For each perturbed query $\mathbf{x}_q'$, the closest instance in $S$ is selected, and the expectation aggregates this distance over the neighborhood. Maximizing $\Omega_{\text{rob}}(S)$ encourages $S$ to remain representative under local variations, producing stable alternatives. Robustness supports \emph{collective validity} (P4) by ensuring the set maintains utility across a neighborhood of plausible inputs. This aligns with actionable and trustworthy counterfactual reasoning, where recommendations remain consistent and dependable under small uncertainties.
+
+\paragraph{Diversity.}
+Counterfactuals should expose distinct paths of change rather than minor variations along a single dimension~\cite{laugel2023achieving}. A diversity objective can be defined as the total pairwise dispersion:
+\begingroup\small
+\begin{equation}
+    \Omega_{\text{div}}(S) 
+    = \sum_{\mathbf{x}_i, \mathbf{x}_j \in S,\, i<j} d(\mathbf{x}_i, \mathbf{x}_j).
+\end{equation}
+\endgroup
+Maximizing $\Omega_{\text{div}}(S)$ encourages diverse alternatives, enabling users to explore multiple recourse strategies while maintaining proximity for actionability. Diversity supports \emph{collective validity} (P4) by promoting complementary rather than redundant answers, ensuring the set spans multiple meaningful directions. This aligns with data-centric counterfactual analysis, providing informative alternative sets. This formulation corresponds to the max-sum diversification problem~\cite{borodin2017max}, with efficient approximation algorithms available.
+
+\paragraph{Fairness.}
+For auditing and decision support, the composition of the returned set is critical~\cite{kusner2017counterfactual}. Let $g(\mathbf{x})$ denote the value of a protected attribute for instance $\mathbf{x}$ (e.g., gender or ethnicity), and let $\pi_a$ denote the desired proportion of instances in the returned set that belong to group $a$ (i.e., those with $g(\mathbf{x}) = a$). A fairness objective can be defined as
+\begingroup\small
+\begin{equation}
+\Omega_{\text{fair}}(S)
+=
+-
+\left|
+\frac{1}{|S|}\sum_{\mathbf{x}\in S}\mathbf{1}[g(\mathbf{x})=a] - \pi_a
+\right|.
+\end{equation}
+\endgroup
+Maximizing $\Omega_{\text{fair}}(S)$ encourages the selected set to match desired group proportions, reducing bias in the returned explanations. Fairness supports \emph{collective validity} (P4) by coupling decisions across candidates and introducing global dependencies. This aligns with responsible, human-centered counterfactual reasoning, where outputs should be feasible, informative, and equitable. In practice, enforcing fairness increases combinatorial complexity and must be balanced with objectives such as cost and diversity.

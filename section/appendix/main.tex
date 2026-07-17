@@ -1,0 +1,107 @@
+Section~ection{Additional Evaluation}
+\label{app:eval}
+
+\rev{This appendix reports the counterfactual-\emph{quality} studies that complement the runtime results of Table~\ref{tab:multimodal_comparison}. All studies are reproducible (fixed seeds) and, consistent with the prototype, use synthetic embeddings; the counterfactual-generator comparison uses our own reference reimplementations of each method's core mechanism (not the released libraries, and not UCI data). Extending to large real corpora and released libraries on standard benchmarks (Adult, German-Credit, HELOC) is ongoing.}
+
+\rev{\noindent\textbf{Modality-specific semantics.} Table~\ref{tab:modality} summarizes, for each modality, the constraint type, the edit representation $\Delta$, and where the constraint is enforced (referenced from Section~\ref{sec:instance}).}
+
+\jp{Check why Tables 3 and 4 come after Tables 6-7.}
+
+\begin{table}[t]
+\centering
+\small
+\caption{\rev{Modality-specific counterfactual semantics: constraint type, edit representation, and where each constraint is enforced.}}
+\label{tab:modality}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}llll@{}}
+\toprule
+Modality & Constraint type & Edit $\Delta$ & Enforced at \\
+\midrule
+Tabular  & column rules, immutability & attribute deltas & index / candidate gen. \\
+Temporal & dynamics, execution validity & valid sub-trajectory & execution validation \\
+Graph    & connectivity, typing, capacity & structural edits & structural validation \\
+Text     & semantic admissibility & span rewrite & semantic validation \\
+Image    & scene/region semantics & localized edit & semantic validation \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+
+\rev{\noindent\textbf{Collective validity (Table~\ref{tab:quality}).} We evaluate the set objectives of Section~\ref{sec:set}---diversity $\Omega_{\text{div}}$, robustness $\Omega_{\text{rob}}$, and fairness $\Omega_{\text{fair}}$---for top-$k$ lowest-cost selection and for objective-specific Set-step selectors ($k{=}5$, pool $m{=}100$, $200$ queries). Top-$k$ is optimal for \emph{none} of the objectives; each objective is best served by its own selector, and diversity and robustness trade off. The pattern holds across text, image, and graph.}
+
+\begin{table}[t]
+\centering\small
+\caption{\rev{Collective-validity objectives (Section~\ref{sec:set}) for top-$k$ vs.\ objective-specific Set-step selection; higher $\Omega$ is better, lower Cost is better. Best per column in \textbf{bold}.}}
+\label{tab:quality}
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Setting & Selector & $\Omega_{\text{div}}\!\uparrow$ & $\Omega_{\text{rob}}\!\uparrow$ & $\Omega_{\text{fair}}\!\uparrow$ & Cost$\downarrow$ \\
+\midrule
+\multirow{4}{*}{Tabular}
+ & Top-$k$   & 97.12  & $-14.16$ & $-0.179$ & \textbf{9.07} \\
+ & Div-opt   & \textbf{117.60} & $-14.44$ & $-0.196$ & 9.96 \\
+ & Rob-opt   & 100.46 & \textbf{$-14.09$} & $-0.197$ & 9.20 \\
+ & Fair-opt  & 110.18 & $-14.33$ & \textbf{$-0.100$} & 9.68 \\
+\midrule
+\multirow{4}{*}{Temporal}
+ & Top-$k$   & 151.52 & $-21.62$ & $-0.190$ & \textbf{14.86} \\
+ & Div-opt   & \textbf{957.31} & $-22.15$ & $-0.185$ & 77.09 \\
+ & Rob-opt   & 153.08 & \textbf{$-21.59$} & $-0.186$ & 14.91 \\
+ & Fair-opt  & 824.42 & $-21.90$ & \textbf{$-0.100$} & 61.80 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\rev{\noindent\textbf{Counterfactual capability (Table~\ref{tab:baselines}).} We compare DcCA against reference reimplementations of representative counterfactual generators on validity, feasibility (immutability), in-distribution rate, set diversity, and cost. Data-grounded methods (DcCA, FACE) are in-distribution by construction, but only DcCA also respects immutability (via immutability-matched retrieval); model-centric generators achieve low nominal cost yet are infeasible and off-manifold. DcCA also yields the most diverse valid set. This is a complementary trade-off: model-centric methods minimize nominal cost, while DcCA emphasizes feasibility, realism, and verifiability.}
+
+\begin{table}[t]
+\centering\small
+\caption{\rev{Counterfactual capability: DcCA vs.\ model-centric generators. Controlled simulation on synthetic tabular data ($N{=}6000$, $3$ categorical immutable attributes, $k{=}5$, $150$ queries) with reference reimplementations of each method's core mechanism---not the released libraries and not UCI data. Higher is better except Cost.}}
+\label{tab:baselines}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Method & Valid.\% & Feas.\% & In-dist.\% & $\Omega_{\text{div}}$ & Cost \\
+\midrule
+\textbf{DcCA (data-centric)}   & 100.0 & \textbf{64.7} & \textbf{100.0} & \textbf{27.08} & 4.09 \\
+FACE (data-path)~\cite{poyiadzi2020face}      & 100.0 & 1.9  & 100.0 & 17.29 & 2.83 \\
+DiCE (diverse grad)~\cite{mothilal2020explaining}   & 100.0 & 0.0  & 1.1   & 9.32  & 1.73 \\
+Wachter (grad)~\cite{wachter2017counterfactual}        & 100.0 & 0.0  & 0.0   & 2.27  & \textbf{1.89} \\
+GeCo (genetic)~\cite{schleich2021geco}        & 80.8  & 0.0  & 0.7   & 20.24 & 1.77 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\rev{\noindent\textbf{Approximation and scale (Tables~\ref{tab:ann}--\ref{tab:scale}).} Approximate (IVF-style coarse-quantized) retrieval preserves recall at substantial speedup over exact search, confirming that approximate nearest-neighbor techniques apply to counterfactual retrieval over embeddings. End-to-end latency up to $N{=}5\times10^{5}$ shows set selection is near-constant while retrieval dominates scaling, motivating the constraint-aware index of Section~\ref{sec:query-answering}.}
+
+\begin{table}[t]
+\centering\small
+\caption{\rev{Exact vs.\ approximate (IVF-style) retrieval; $N{=}10000$, $d{=}64$, $k{=}100$. Exact search: $1.65$\,ms/query.}}
+\label{tab:ann}
+\begin{tabular}{@{}rrr@{}}
+\toprule
+nprobe & Recall@100 & Speedup vs.\ exact \\
+\midrule
+1  & 0.425 & 22.7$\times$ \\
+4  & 0.940 & 9.4$\times$ \\
+8  & 1.000 & 5.6$\times$ \\
+16 & 1.000 & 2.7$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering\small
+\caption{\rev{Scalability of online query answering (search + set selection), $d{=}64$. Set selection is near-constant; retrieval dominates scaling.}}
+\label{tab:scale}
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+$N$ & Search (ms) & Set-step (ms) & Total (ms) \\
+\midrule
+1{,}000    & 0.10   & 1.47 & 1.57 \\
+10{,}000   & 1.25   & 1.49 & 2.74 \\
+100{,}000  & 15.40  & 1.46 & 16.87 \\
+500{,}000  & 129.09 & 1.51 & 130.60 \\
+\bottomrule
+\end{tabular}
+\end{table}

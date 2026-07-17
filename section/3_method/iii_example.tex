@@ -1,0 +1,13 @@
+\subsection{An Illustrative Example on Tabular Data}
+
+We illustrate how counterfactual querying realizes our vision using a loan approval scenario. Suppose Maya applies for a loan and her application is denied. Her record is
+$
+\texttt{(Income=\$58k, Util.=41\%, Delinq.=1, State=NC, Age=28)}.
+$
+She asks: \emph{``What would I need to change to get approved?''} This question is naturally expressed as a counterfactual query $(q,\omega,\Omega,k)$, where $\omega$ encodes feasibility and cost (e.g., age is immutable, effort varies by attribute), $k$ specifies the number of options, and $\Omega$ promotes diverse recourse strategies.
+
+\textbf{Offline.} The system prepares $\mathcal D$ under $\omega$ by defining admissibility and cost (e.g., $\text{Age} \neq 28$ is infeasible) and building a label-aware index $\mathcal I$ over approved records. This ensures traceable edits and cost-faithful ranking (P1--P2), while enabling efficient retrieval (P3).
+
+\textbf{Online.} Given $(q,\omega,\Omega,k)$, the system retrieves a candidate pool of feasible instances with low cost, then selects $k$ answers by optimizing Eq.~\eqref{eqn:objective} to balance effort and diversity (P4). It returns each instance with an interpretable edit $\Delta(\mathbf{x}_q,\mathbf{x})$.
+
+In the end, Maya may receive three complementary paths to approval, such as (i) \texttt{+10k income with -2\% utilization}, (ii) \texttt{-14\% utilization}, or (iii) \texttt{-1 delinquency with -6\% utilization}. These results are grounded in real data (P1), feasible under $\omega$ (P2), efficiently retrieved (P3), and collectively valid under $\Omega$ (P4), illustrating actionable data-centric reasoning.

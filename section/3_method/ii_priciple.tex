@@ -1,0 +1,17 @@
+\subsection{Core Principles}\label{sec:core_principles}
+
+The formulation above exposes the key requirements for counterfactual querying: results must be actionable, cost-faithful, scalable, and informative as a set, which can be distilled into four core principles for system design.
+
+\paragraph{\textbf{P1 (Interpretability).}} 
+\emph{Counterfactual results must be interpretable in the original domain}. For each selected counterfactual $\mathbf{x} \in S^\star$, the system returns a domain-level edit $\Delta(\mathbf{x}_q,\mathbf{x})$ (e.g., feature changes in tabular data or valid edit sequences in structured data). Both the representation and index must preserve sufficient information to reconstruct $\Delta(\mathbf{x}_q,\mathbf{x})$, and the cost $\omega(\mathbf{x}_q,\mathbf{x})$ must be grounded in this edit. Thus, the result is tied to actionable transformations rather than similarity, supporting human-centered reasoning.
+
+\paragraph{\textbf{P2 (Cost faithfulness).}} 
+\emph{The cost function $\omega(\mathbf{x}_q,\mathbf{x})$ must reflect true intervention effort}. If $\omega(\mathbf{x}_q,\mathbf{x}_a) < \omega(\mathbf{x}_q,\mathbf{x}_b)$, then transforming $\mathbf{x}_q$ to $\mathbf{x}_a$ should be no harder than to $\mathbf{x}_b$ under the intended domain model. Infeasible transformations are assigned infinite cost, cleanly separating feasibility from effort. This principle anchors retrieval in realistic actions, ensuring semantic correctness.
+
+\paragraph{\textbf{P3 (Efficiency).}} 
+\emph{The system must efficiently retrieve admissible candidates in $\mathcal \omega(q)$ at scale}. It should provide predictable performance, bounded resource usage, and controllable trade-offs between accuracy and latency. This principle makes the vision practical, enabling deployment over large and heterogeneous datasets.
+
+\paragraph{\textbf{P4 (Collective validity).}} 
+\emph{The returned answer set must jointly optimize set-level objectives and transformation cost}. Given $(q,\omega,\Omega,k)$, the solution $S^\star$ satisfies $|S^\star|=k$ and optimizes Eq.~\eqref{eqn:objective}. Since $\Omega$ captures collective criteria such as diversity, robustness, and fairness, the system must balance these objectives against per-instance cost. This elevates query answering from ranking individual instances to constructing informative and complementary sets.
+
+Together, P1--P4 define counterfactual querying as structured, constraint-aware, and set-oriented retrieval rather than similarity search, ensuring actionability, scalability, and collective validity.

@@ -1,0 +1,54 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Runtimes across modalities comparing DcCA with state-of-the-art baselines. N/A indicates unsupported stages. All times are in milliseconds (ms): preprocessing and indexing are measured over the dataset, while search (Step~2.a) and set selection (Step~2.b) are reported per query.}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{l r l l l r r r r}
+\specialrule{0.12em}{0pt}{0pt}
+Method & Dim & Feature & Engine & Retrieval & Prep. & Index & Search & Set \\
+\specialrule{0.12em}{0pt}{0pt}
+
+\multicolumn{9}{c}{\textbf{Tabular} ($N$=10000)} \\
+\midrule
+Baseline & 20 & Raw & DuckDB & Linear Scan & 0.00 & 23.62 & 2.66 & N/A \\
+KD-Tree  & 20 & Raw & SciPy & KD-Tree Search & 0.00 & 3.57 & 0.98 & N/A \\
+DcCA     & 64 & Table2Vec & FAISS & k-NN Search & 14.03 & 0.87 & 3.91 & 3.03 \\
+
+\specialrule{0.12em}{0pt}{0pt}
+\multicolumn{9}{c}{\textbf{Temporal} ($N$=500)} \\
+\midrule
+Baseline & 50 & Raw & tslearn & DTW Scan & 0.00 & 0.00 & 2377.50 & N/A \\
+SAX      & 10 & Symbolic & iSAX & Hamming Search & 0.93 & 0.00 & 0.49 & N/A \\
+DcCA     & 128 & Time2Vec & FAISS & k-NN Search & 2.05 & 0.06 & 1.28 & 2.51 \\
+
+\specialrule{0.12em}{0pt}{0pt}
+\multicolumn{9}{c}{\textbf{Text} ($N$=500)} \\
+\midrule
+Baseline & 512 & Keyword & DuckDB-FTS & Keyword Match & 0.00 & 2.75 & 1.12 & N/A \\
+BM25     & 512 & BM25 & Whoosh & BM25 Ranking & 0.00 & 29.25 & 14.67 & N/A \\
+DcCA     & 384 & SBERT & FAISS & k-NN Search & 253.01 & 0.09 & 1.57 & 2.82 \\
+
+\specialrule{0.12em}{0pt}{0pt}
+\multicolumn{9}{c}{\textbf{Image} ($N$=100)} \\
+\midrule
+Baseline & 150528 & Raw & DuckDB-Blob & Linear Scan & 0.00 & 0.00 & 103.75 & N/A \\
+dHash    & 64 & dHash & FastBit & Hamming Search & 0.09 & 0.00 & 0.09 & N/A \\
+DcCA     & 512 & ResNet18 & FAISS & k-NN Search & 1921.81 & 0.74 & 3.69 & 3.20 \\
+
+\specialrule{0.12em}{0pt}{0pt}
+\multicolumn{9}{c}{\textbf{Graph} ($N$=2000)} \\
+\midrule
+Baseline & N/A & Adjacency & Neo4j & BFS Search & 0.00 & 6.30 & 0.17 & N/A \\
+DcCA     & 128 & GCN & Neo4j-VEC & k-NN Search & 3.73 & 0.14 & 1.52 & 2.60 \\
+
+\specialrule{0.12em}{0pt}{0pt}
+\multicolumn{9}{c}{\textbf{MultiModal: Tabular + Text + Image} ($N$=100)} \\
+\midrule
+DcCA     & 512 & CLIP & FAISS & k-NN Search & 2265.25 & 0.14 & 2.32 & 2.82 \\
+
+\specialrule{0.12em}{0pt}{0pt}
+\end{tabular}
+}
+\label{tab:multimodal_comparison}
+\end{table}
+

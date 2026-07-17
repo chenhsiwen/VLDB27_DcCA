@@ -1,0 +1,20 @@
+\section{Success Criteria}\label{sec:success}
+
+To realize our vision of data-centric counterfactual analysis, success should be measured not only by performance, but by how well systems support the semantics, principles (P1--P4), and design goals established in Sections~1--5. We outline five criteria that characterize a successful counterfactual query system.
+
+\paragraph{\textbf{C1 (Semantic queryability).}}
+Counterfactual querying should enable \emph{action-oriented} questions (e.g., ``what needs to change?'') rather than predictive queries alone. This extends data systems from passive retrieval to structured reasoning over constraints, costs, and outcomes.
+
+\paragraph{\textbf{C2 (Unified data--model integration).}}
+Systems should treat data, constraints, and learned representations as interoperable components. Rather than relying solely on embeddings or model introspection, they should integrate structured semantics with learned features within a unified query framework.
+
+\paragraph{\textbf{C3 (Constraint-, cost-, and efficiency-aware processing).}}
+Systems must natively support feasibility constraints, cost-faithful transformations (P1--P2), and efficient query execution at scale (P3). This requires integrating constraint-aware indexing, cost-aware retrieval, and scalable query processing, rather than relying on post hoc filtering.
+
+\paragraph{\textbf{C4 (Set-level reasoning).}}
+Systems should elevate set-level objectives (e.g., diversity, robustness, fairness) to first-class query constructs (P4). This enables principled selection of complementary counterfactuals, moving beyond tuple-at-a-time retrieval to holistic answer construction.
+
+\paragraph{\textbf{C5 (Actionable outputs).}}
+Counterfactual queries should return interpretable and executable edits grounded in real data. This ensures that results are not only correct but also actionable and trustworthy, supporting human-in-the-loop decision making.
+
+Together, these criteria define a shift from similarity-based retrieval to constraint-aware, cost-faithful, efficient, and set-oriented data systems, providing a concrete path toward realizing our vision.

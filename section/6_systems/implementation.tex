@@ -1,0 +1,43 @@
+%\section{Implementation Readiness and Systems Alignment}
+
+\section{DcCA: A Proof-of-Concept System}
+\label{sec:systems}
+
+To realize and validate our vision of data-centric counterfactual analysis, we present \textbf{DcCA} (\underline{D}ata-\underline{c}entric \underline{C}ounterfactual \underline{A}nalysis), a proof-of-concept system that instantiates counterfactual querying as a first-class data management primitive. Building on the query model, core principles (P1--P4), and the two-phase framework introduced in Sections~\ref{sec:query-answering}--\ref{sec:set}, \textbf{DcCA} is designed to demonstrate both the feasibility and the practical advantages of our approach. In particular, it shows how constraint-aware retrieval, cost-faithful reasoning, and set-level optimization can be integrated into a unified system, enabling structured and actionable counterfactual analysis over data. We first identify key limitations in existing systems that prevent them from supporting this vision, and then demonstrate how \textbf{DcCA} addresses these challenges through a principled design and preliminary empirical results.
+
+\subsection{Limitations in Existing Work}
+
+Recent systems increasingly integrate vector and similarity search into database engines, including PostgreSQL (pgvector)~\cite{pgvector}, Neo4j~\cite{neo4jVector}, Snowflake~\cite{snowflakeCortex}, and Oracle~\cite{oracleHybridIndex,oracleSearch}. These systems support scalable nearest-neighbor search via indexing structures, along with structured filtering, hybrid lexical--semantic matching~\cite{yates2021pretrained,guu2020retrieval}, and reranking~\cite{khattab2020colbert}. However, these capabilities remain centered on similarity-based retrieval and do not jointly support the constraint-aware, cost-faithful, and set-oriented semantics required for counterfactual querying.
+
+A key limitation comes from pipeline-based designs, where retrieval, filtering, and reranking are treated as separate stages~\cite{croft2010search,miutra2018introduction}. This decomposition conflicts with counterfactual requirements. Feasibility constraints and opposite-outcome predicates reshape the search space rather than act as simple filters, while cost-faithful metrics (P2) often deviate from geometric distances assumed by existing indexes. As a result, systems may return infeasible candidates or rely on post hoc validation, weakening both efficiency (P3) and correctness.
+
+\jp{This paragraph is too defensive.}
+
+\rev{We stress that this staged decomposition is the limitation we identify, not an endorsement: post-hoc feasibility filtering reshapes the feasible space too late (degrading recall and stability), the embedding metric is not the cost-faithful $\omega$, and tuple-at-a-time selection cannot optimize the coupled objective $\Omega$. Table~\ref{tab:positioning} contrasts counterfactual querying with existing paradigms; only when $\omega$, the opposite-outcome predicate, and $\Omega$ are treated as first-class can they be optimized jointly rather than staged.}
+
+\prev{Current retrieval systems expose vector search, filtering, and subset selection as independent operators. Consequently, they can only execute counterfactual queries as staged pipelines, where feasibility is checked after retrieval and set-level objectives are optimized after candidate generation. This decomposition prevents the system from jointly optimizing access paths, indexes, and execution plans with respect to the opposite-outcome predicate, intervention cost $\omega$, and set objective $\Omega$. Table~\ref{tab:positioning} summarizes this gap: existing systems support individual components, whereas counterfactual querying requires them to be treated as first-class query constructs.}
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{\rev{Capabilities required by counterfactual querying vs.\ existing paradigms; only \textbf{DcCA} provides all jointly. \emph{Opposite}: opposite-outcome predicate; \emph{Cost}: non-metric, asymmetric transformation cost $\omega$; \emph{Feasib.}: feasibility reshapes the search space (not a post-filter); \emph{Set}: set-level objective $\Omega$; \emph{Edit}: interpretable edit $\Delta$.}}
+\label{tab:positioning}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Paradigm & Opposite & Cost & Feasib. & Set & Edit \\
+\midrule
+Constrained retrieval~\cite{lee2019constraint}      & No  & No      & Partial & No  & No \\
+Vector DB / ANN~\cite{pgvector,malkov2018efficient} & No  & No      & No      & No  & No \\
+NN search~\cite{indyk1998approximate}               & No  & No      & No      & No  & No \\
+Subset selection~\cite{borodin2017max}              & No  & No      & No      & Yes & No \\
+FACE~\cite{poyiadzi2020face}                        & Yes & Partial & Partial & No  & Partial \\
+\textbf{DcCA (ours)}                                & Yes & Yes     & Yes     & Yes & Yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+These limitations are evident in practice. For example, \textbf{pgvector} applies filtering after index traversal~\cite{pgvector}, which can reduce valid candidates and require repeated scans. Approximate nearest-neighbor methods show similar issues, as post-filtering under structured constraints can degrade recall and stability~\cite{dong2011efficient,malkov2018efficient}. More fundamentally, current systems do not treat feasibility specifications $\omega$, counterfactual predicates, or set-level objectives $\Omega$ as first-class constructs. Thus, they cannot support traceable edits (P1), cost-faithful ranking (P2), constraint-aware retrieval (P3), and collective validity (P4) in a unified way.
+
+Overall, current systems remain far from the requirements of counterfactual querying. Bridging this gap requires making counterfactual querying a first-class abstraction, so retrieval, constraints, cost, and set-level objectives can be specified and optimized jointly within data systems.
